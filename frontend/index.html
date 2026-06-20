@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MeraPath — Tender Analyser</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+    .gap-btn {
+      margin-left: auto;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--orange);
+      cursor: pointer;
+      padding: 2px 6px;
+      border: 1px solid var(--orange);
+      border-radius: 4px;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+
+    .gap-btn:hover {
+      background: var(--orange);
+      color: #fff;
+    }
+
+    /* GAP MODAL */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-box {
+      background: #fff;
+      border-radius: 16px;
+      padding: 28px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      font-size: 20px;
+      cursor: pointer;
+      color: var(--text3);
+      background: none;
+      border: none;
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 4px;
+    }
+
+    .modal-sub {
+      font-size: 12px;
+      color: var(--text3);
+      margin-bottom: 20px;
+    }
+
+    .gap-section {
+      margin-bottom: 16px;
+    }
+
+    .gap-section-label {
+      font-size: 9.5px;
+      font-weight: 700;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+
+    .gap-section-body {
+      font-size: 13px;
+      color: var(--text1);
+      line-height: 1.7;
+      background: var(--surface);
+      padding: 10px 12px;
+      border-radius: 8px;
+      border-left: 3px solid var(--teal);
+    }
+
+    .risk-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .risk-low {
+      background: #E8F5E9;
+      color: var(--green);
+    }
+
+    .risk-medium {
+      background: #FFF3E0;
+      color: var(--orange);
+    }
+
+    .risk-high {
+      background: #FFEBEE;
+      color: var(--red);
+    }
+
+    .doc-chip {
+      display: inline-block;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-size: 11px;
+      color: var(--text2);
+      margin: 2px 4px 2px 0;
+    }
+
+    .gap-loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--text3);
+      font-size: 14px;
+    }
+
+    :root {
+      --navy: #0D1B40;
+      --blue: #1565C0;
+      --teal: #0097A7;
+      --gold: #F9A825;
+      --green: #1B5E20;
+      --red: #C62828;
+      --orange: #E65100;
+      --white: #FFFFFF;
+      --surface: #F4F6FA;
+      --border: #D1D5E8;
+      --text1: #0D1B40;
+      --text2: #3D4A7A;
+      --text3: #6B7AAB;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--surface);
+      color: var(--text1);
+      min-height: 100vh;
+    }
+
+    /* HEADER */
+    .header {
+      background: var(--navy);
+      padding: 14px 32px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo-pill {
+      background: var(--teal);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      padding: 5px 12px;
+      border-radius: 4px;
+    }
+
+    .header-title {
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .header-sub {
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 11px;
+      margin-left: auto;
+    }
+
+    /* UPLOAD SCREEN */
+    #uploadScreen {
+      max-width: 680px;
+      margin: 60px auto;
+      padding: 0 20px;
+    }
+
+    .upload-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 48px;
+      text-align: center;
+    }
+
+    .upload-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .upload-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 8px;
+    }
+
+    .upload-sub {
+      font-size: 14px;
+      color: var(--text3);
+      margin-bottom: 32px;
+    }
+
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 40px;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--surface);
+    }
+
+    .drop-zone:hover,
+    .drop-zone.drag-over {
+      border-color: var(--teal);
+      background: #E0F7FA;
+    }
+
+    .drop-zone input {
+      display: none;
+    }
+
+    .drop-text {
+      font-size: 14px;
+      color: var(--text3);
+      margin-top: 10px;
+    }
+
+    .browse-btn {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 10px 28px;
+      background: var(--navy);
+      color: #fff;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .browse-btn:hover {
+      background: var(--blue);
+    }
+
+    /* LOADING */
+    #loadingScreen {
+      display: none;
+      max-width: 480px;
+      margin: 80px auto;
+      text-align: center;
+      padding: 0 20px;
+    }
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid var(--border);
+      border-top-color: var(--teal);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 24px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loading-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 8px;
+    }
+
+    .loading-steps {
+      font-size: 13px;
+      color: var(--text3);
+      line-height: 2;
+    }
+
+    /* RESULTS SCREEN */
+    #resultsScreen {
+      display: none;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 20px;
+    }
+
+    .results-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .results-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--navy);
+      flex: 1;
+    }
+
+    .new-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text2);
+    }
+
+    .new-btn:hover {
+      background: var(--border);
+    }
+
+    /* MAIN LAYOUT */
+    .results-layout {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 20px;
+    }
+
+    /* LEFT PANEL */
+    .left-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .panel {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    /* JIST */
+    .jist-box {
+      padding: 16px 18px;
+      font-size: 13px;
+      color: var(--text2);
+      line-height: 1.7;
+      border-left: 3px solid var(--teal);
+      background: var(--surface);
+      margin: 14px 18px;
+      border-radius: 0 8px 8px 0;
+    }
+
+    /* KEY DATES */
+    .dates-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      padding: 14px 18px;
+    }
+
+    .date-card {
+      background: var(--surface);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+
+    .date-label {
+      font-size: 9.5px;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+
+    .date-value {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--navy);
+      margin-top: 3px;
+    }
+
+    /* PREVIEW TABLE */
+    .preview-section {
+      padding: 14px 18px;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 12px;
+      align-items: start;
+      margin-bottom: 10px;
+    }
+
+    .field-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding-top: 8px;
+    }
+
+    .field-input {
+      width: 100%;
+      padding: 7px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 12.5px;
+      color: var(--text1);
+      background: #fff;
+      font-family: 'Inter', sans-serif;
+      resize: vertical;
+      outline: none;
+      min-height: 36px;
+    }
+
+    .field-input:focus {
+      border-color: var(--teal);
+    }
+
+    .field-input.textarea {
+      min-height: 70px;
+    }
+
+    /* DOWNLOAD BUTTONS */
+    .download-section {
+      padding: 16px 18px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .confirm-msg {
+      padding: 10px 14px;
+      background: #E8F5E9;
+      border: 1px solid #81C784;
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--green);
+      font-weight: 500;
+      display: none;
+      margin: 0 18px 12px;
+    }
+
+    .dl-btn {
+      flex: 1;
+      min-width: 180px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      text-align: center;
+      transition: all 0.15s;
+    }
+
+    .dl-top {
+      background: var(--navy);
+      color: #fff;
+    }
+
+    .dl-top:hover {
+      background: var(--blue);
+    }
+
+    .dl-report {
+      background: var(--teal);
+      color: #fff;
+    }
+
+    .dl-report:hover {
+      background: #00838F;
+    }
+
+    .dl-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* RIGHT SIDEBAR */
+    .right-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .sidebar-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .sidebar-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+
+    .kv-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+      gap: 8px;
+    }
+
+    .kv-key {
+      font-size: 11.5px;
+      color: var(--text3);
+      flex-shrink: 0;
+    }
+
+    .kv-val {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--navy);
+      text-align: right;
+    }
+
+    /* MATCH ENGINE */
+    .match-item {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--surface);
+    }
+
+    .match-reason {
+      width: 100%;
+      font-size: 10.5px;
+      color: var(--text3);
+      line-height: 1.5;
+      padding-left: 28px;
+      margin-top: -2px;
+    }
+
+    .match-item:last-child {
+      border-bottom: none;
+    }
+
+    .match-icon {
+      font-size: 14px;
+      flex-shrink: 0;
+      width: 20px;
+    }
+
+    .match-label {
+      font-size: 11.5px;
+      color: var(--text2);
+      flex: 1;
+    }
+
+    .match-detail {
+      font-size: 10px;
+      color: var(--text3);
+    }
+
+    /* SCORE */
+    .score-block {
+      text-align: center;
+      padding: 8px 0;
+    }
+
+    .score-num {
+      font-size: 42px;
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1;
+    }
+
+    .score-label {
+      font-size: 11px;
+      color: var(--text3);
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .score-bar {
+      height: 8px;
+      background: var(--surface);
+      border-radius: 4px;
+      margin: 10px 0;
+      overflow: hidden;
+    }
+
+    .score-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: var(--teal);
+      transition: width 1s ease;
+    }
+
+    .prob-block {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--surface);
+    }
+
+    .prob-label {
+      font-size: 11.5px;
+      color: var(--text3);
+    }
+
+    .prob-val {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--green);
+    }
+
+    .score-reason {
+      font-size: 11px;
+      color: var(--text2);
+      line-height: 1.6;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--surface);
+    }
+
+    /* TOAST */
+    .toast-wrap {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 999;
+    }
+
+    .toast {
+      background: var(--navy);
+      color: #fff;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      margin-top: 8px;
+      border-left: 3px solid var(--teal);
+      animation: toastIn 0.3s ease;
+    }
+
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateX(16px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0)
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="header">
+    <div class="logo-pill">MERAPATH</div>
+    <div class="header-title">Tender Analyser</div>
+    <div class="header-sub">MeraPath Tender Analyser</div>
+  </div>
+
+  <!-- UPLOAD SCREEN -->
+  <div id="uploadScreen">
+    <div class="upload-card">
+      <div class="upload-icon">📄</div>
+      <div class="upload-title">Upload Tender PDF</div>
+      <div class="upload-sub">AI reads the tender, extracts all fields, checks MeraPath eligibility, and generates both
+        DOCX files ready to download.</div>
+      <div class="drop-zone" id="dropZone">
+        <input type="file" id="fileInput" accept=".pdf">
+        <div style="font-size:32px">📂</div>
+        <div class="drop-text">Drag and drop your tender PDF here</div>
+        <div class="browse-btn" onclick="document.getElementById('fileInput').click()">Browse Files</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOADING SCREEN -->
+  <div id="loadingScreen">
+    <div class="spinner"></div>
+    <div class="loading-title">Analysing Tender...</div>
+    <div class="loading-steps" id="loadingSteps">
+      📄 Reading PDF...<br>
+      🤖 AI extracting all fields...<br>
+      ✅ Checking MeraPath eligibility...<br>
+      📊 Calculating bid strength score...
+    </div>
+  </div>
+
+  <!-- RESULTS SCREEN -->
+  <div id="resultsScreen">
+    <div class="results-header">
+      <div class="results-title" id="resultsTitle">Tender Analysis Complete</div>
+      <button class="new-btn" onclick="resetToUpload()">+ Analyse New Tender</button>
+    </div>
+
+    <div class="results-layout">
+      <!-- LEFT -->
+      <div class="left-panel">
+
+        <!-- Summary -->
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">📝 Tender Summary (Jist)</span></div>
+          <div class="jist-box" id="jistBox">—</div>
+        </div>
+
+        <!-- Key Dates -->
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">📅 Key Dates</span></div>
+          <div class="dates-grid">
+            <div class="date-card">
+              <div class="date-label">Start Date</div>
+              <div class="date-value" id="d-start">—</div>
+            </div>
+            <div class="date-card">
+              <div class="date-label">Submission Deadline</div>
+              <div class="date-value" id="d-end" style="color:var(--red)">—</div>
+            </div>
+            <div class="date-card">
+              <div class="date-label">Estimated Value</div>
+              <div class="date-value" id="d-value" style="color:var(--teal)">—</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Editable TOP Preview -->
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">✏️ Tender One Pager — Preview & Edit</span>
+            <span style="margin-left:auto;font-size:11px;color:var(--text3)">Edit any field before downloading</span>
+          </div>
+          <div class="preview-section" id="previewSection">
+            <!-- Fields injected by JS -->
+          </div>
+          <div class="confirm-msg" id="confirmMsg">✅ Changes saved. Your DOCX will include the updated values.</div>
+          <div class="download-section">
+            <button class="dl-btn dl-top" onclick="downloadTOP()">📄 Download TOP.docx</button>
+            <button class="dl-btn dl-report" onclick="downloadReport()">📋 Download Report.docx</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT SIDEBAR -->
+      <div class="right-sidebar">
+
+        <!-- Key Details -->
+        <div class="sidebar-card">
+          <div class="sidebar-title">📋 Key Details</div>
+          <div class="kv-row"><span class="kv-key">Department</span><span class="kv-val" id="s-dept">—</span></div>
+          <div class="kv-row"><span class="kv-key">Category</span><span class="kv-val" id="s-cat">—</span></div>
+          <div class="kv-row"><span class="kv-key">Portal</span><span class="kv-val" id="s-portal">—</span></div>
+          <div class="kv-row"><span class="kv-key">State</span><span class="kv-val" id="s-state">—</span></div>
+          <div class="kv-row"><span class="kv-key">Region</span><span class="kv-val" id="s-region">—</span></div>
+          <div class="kv-row"><span class="kv-key">Bid Number</span><span class="kv-val" id="s-bid">—</span></div>
+          <div class="kv-row"><span class="kv-key">RA Option</span><span class="kv-val" id="s-ra">—</span></div>
+          <div class="kv-row"><span class="kv-key">ePBG</span><span class="kv-val" id="s-epbg">—</span></div>
+        </div>
+
+        <!-- Match Engine -->
+        <div class="sidebar-card">
+          <div class="sidebar-title">🎯 MeraPath Match Engine</div>
+          <div id="matchEngine">—</div>
+        </div>
+
+        <!-- Score -->
+        <div class="sidebar-card">
+          <div class="sidebar-title">📊 Bid Strength</div>
+          <div class="score-block">
+            <div class="score-num" id="scoreNum">—</div>
+            <div class="score-label">out of 100</div>
+            <div class="score-bar">
+              <div class="score-fill" id="scoreFill" style="width:0%"></div>
+            </div>
+          </div>
+          <div class="prob-block">
+            <div class="prob-label">Win Probability</div>
+            <div class="prob-val" id="probVal">—</div>
+          </div>
+          <div class="score-reason" id="scoreReason">—</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast-wrap" id="toastWrap"></div>
+
+  <script>
+    const API = 'http://localhost:8001';
+    let currentData = null;
+
+    const MATCH_LABELS = {
+      pmgdisha: 'PMGDISHA Experience', jjm: 'Jal Jeevan Mission',
+      lakhpati: 'Lakhpati Didi', ndlm: 'NDLM Experience',
+      pmay: 'PMAY-G Experience', iso: 'ISO Certifications',
+      msme: 'MSME Status', geographic: 'Geographic Reach', scale: 'Beneficiary Scale'
+    };
+
+    // ── FILE HANDLING ─────────────────────────────────────────────────────────
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault(); dropZone.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file && file.type === 'application/pdf') uploadFile(file);
+      else showToast('⚠️ Please upload a PDF file');
+    });
+    fileInput.addEventListener('change', e => {
+      if (e.target.files[0]) uploadFile(e.target.files[0]);
+    });
+
+    // ── UPLOAD & ANALYSE ─────────────────────────────────────────────────────
+    async function uploadFile(file) {
+      showScreen('loading');
+      animateLoadingSteps();
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const res = await fetch(`${API}/analyse`, { method: 'POST', body: formData });
+        const data = await res.json();
+
+        // Handle errors returned from server
+        if (data.error) {
+          let title = 'Analysis Failed';
+          let msg = data.message || 'Something went wrong';
+          let icon = '❌';
+
+          if (data.error === 'rate_limit') {
+            title = 'Groq Rate Limit Hit';
+            msg = 'Free-tier daily token limit reached. Wait a few minutes and try again — it resets automatically.';
+            icon = '⏳';
+          } else if (data.error === 'api_credits') {
+            title = 'API Credits Required';
+            msg = 'Check your Groq API key at console.groq.com → API Keys.';
+            icon = '💳';
+          } else if (data.error === 'invalid_pdf') {
+            title = 'PDF Could Not Be Read';
+            msg = 'This PDF may be a scanned image. Try uploading a text-based PDF — one where you can select and copy text.';
+            icon = '📄';
+          }
+
+          showErrorScreen(icon, title, msg);
+          return;
+        }
+
+        currentData = data;
+        populateResults(data);
+        showScreen('results');
+        showToast('✅ Analysis complete — review and download');
+
+      } catch (err) {
+        showErrorScreen('🔌', 'Server Not Reachable', 'Make sure the server is running. In Terminal: python3 main.py');
+      }
+    }
+
+    // ── POPULATE RESULTS ─────────────────────────────────────────────────────
+    function populateResults(d) {
+      document.getElementById('resultsTitle').textContent = d.project_name || 'Analysis Complete';
+      document.getElementById('jistBox').textContent = d.jist || '—';
+      document.getElementById('d-start').textContent = d.start_date || '—';
+      document.getElementById('d-end').textContent = d.end_date || '—';
+      document.getElementById('d-value').textContent = d.estimated_cost || '—';
+
+      // Match Engine
+      const match = d.match_engine || {};
+      document.getElementById('matchEngine').innerHTML = Object.entries(MATCH_LABELS).map(([k, label]) => `
+    <div class="match-item" id="match-${k}">
+      <span class="match-icon">${match[k] ? '✅' : '❌'}</span>
+      <span class="match-label">${label}</span>
+      ${!match[k] ? `<span class="gap-btn" onclick="showGapFix('${k}','${label}')">Fix →</span>` : ''}
+    </div>`).join('');
+
+      // Sidebar
+      document.getElementById('s-dept').textContent = truncate(d.department_name, 30);
+      document.getElementById('s-cat').textContent = (d.category || '').replace(/_/g, ' ');
+      document.getElementById('s-portal').textContent = d.portal || '—';
+      document.getElementById('s-state').textContent = d.state || '—';
+      document.getElementById('s-region').textContent = d.region || '—';
+      document.getElementById('s-bid').textContent = d.bid_number || '—';
+      document.getElementById('s-ra').textContent = d.ra_option || '—';
+      document.getElementById('s-epbg').textContent = d.epbg || '—';
+
+      // Auto-fetch gap reasons for sidebar
+      loadGapReasons(d);
+
+      // Score
+      const score = d.bid_strength_score || 0;
+      const prob = d.win_probability || 0;
+      document.getElementById('scoreNum').textContent = score;
+      document.getElementById('scoreFill').style.width = score + '%';
+      document.getElementById('probVal').textContent = prob + '%';
+      document.getElementById('scoreReason').textContent = d.score_reasoning || '';
+
+      // Preview fields
+      buildPreview(d);
+    }
+
+    function buildPreview(d) {
+      const fields = [
+        { key: 'bid_number', label: 'Bid Number' },
+        { key: 'ra_option', label: 'RA Option' },
+        { key: 'start_date', label: 'Start Date' },
+        { key: 'end_date', label: 'End Date & Time' },
+        { key: 'department_name', label: 'Department & Address', big: true },
+        { key: 'estimated_cost', label: 'Estimated Cost' },
+        { key: 'epbg', label: 'ePBG' },
+        { key: 'processing_fee', label: 'Processing Fee' },
+        { key: 'tender_fee', label: 'Tender Fee' },
+        { key: 'appraisal_fee', label: 'Appraisal Fee' },
+        { key: 'project_name', label: 'Name of Project', big: true },
+      ];
+      const listFields = [
+        { key: 'scope_of_work', label: 'Scope of Work' },
+        { key: 'eligibility_criteria', label: 'Eligibility Criteria' },
+        { key: 'documents_required', label: 'Documents Required' },
+        { key: 'remarks_risk', label: 'Remarks / Risk Points' },
+      ];
+
+      let html = '';
+      for (const f of fields) {
+        const val = d[f.key] || '';
+        html += `<div class="field-row">
+      <div class="field-label">${f.label}</div>
+      <${f.big ? 'textarea' : 'input'} class="field-input${f.big ? ' textarea' : ''}"
+        data-key="${f.key}"
+        ${f.big ? '' : `type="text" value="${val.replace(/"/g, '&quot;')}"`}
+        onchange="updateField('${f.key}', this.value)"
+      >${f.big ? val : ''}</${f.big ? 'textarea' : 'input'}>
+    </div>`;
+      }
+      for (const f of listFields) {
+        const items = (d[f.key] || []).join('\n');
+        html += `<div class="field-row">
+      <div class="field-label">${f.label}</div>
+      <textarea class="field-input textarea" data-key="${f.key}"
+        onchange="updateListField('${f.key}', this.value)"
+      >${items}</textarea>
+    </div>`;
+      }
+      document.getElementById('previewSection').innerHTML = html;
+    }
+
+    function updateField(key, val) {
+      if (currentData) {
+        currentData[key] = val;
+        document.getElementById('confirmMsg').style.display = 'block';
+        showToast('✏️ Field updated — changes will appear in downloaded DOCX');
+      }
+    }
+
+    function updateListField(key, val) {
+      if (currentData) {
+        currentData[key] = val.split('\n').filter(l => l.trim());
+        document.getElementById('confirmMsg').style.display = 'block';
+      }
+    }
+
+    // ── DOWNLOADS ─────────────────────────────────────────────────────────────
+    async function downloadTOP() {
+      if (!currentData) return;
+      showToast('📄 Generating TOP.docx...');
+      try {
+        const res = await fetch(`${API}/download/top`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(currentData)
+        });
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = `TOP_${(currentData.project_name || 'tender').slice(0, 30)}.docx`;
+        a.click(); URL.revokeObjectURL(url);
+        showToast('✅ TOP.docx downloaded');
+      } catch (e) { showToast('❌ Download failed — is server running?'); }
+    }
+
+    async function downloadReport() {
+      if (!currentData) return;
+      showToast('📋 Generating Report.docx...');
+      try {
+        const res = await fetch(`${API}/download/report`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(currentData)
+        });
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = `Report_${(currentData.project_name || 'tender').slice(0, 30)}.docx`;
+        a.click(); URL.revokeObjectURL(url);
+        showToast('✅ Report.docx downloaded');
+      } catch (e) { showToast('❌ Download failed — is server running?'); }
+    }
+
+    // ── HELPERS ───────────────────────────────────────────────────────────────
+    function showScreen(name) {
+      document.getElementById('uploadScreen').style.display = name === 'upload' ? 'block' : 'none';
+      document.getElementById('loadingScreen').style.display = name === 'loading' ? 'block' : 'none';
+      document.getElementById('resultsScreen').style.display = name === 'results' ? 'block' : 'none';
+    }
+
+    function resetToUpload() {
+      currentData = null;
+      document.getElementById('fileInput').value = '';
+      showScreen('upload');
+    }
+
+    function truncate(str, n) { return str && str.length > n ? str.slice(0, n) + '…' : (str || '—'); }
+
+    function animateLoadingSteps() {
+      const steps = [
+        '📄 Reading PDF...',
+        '🤖 AI extracting all fields...',
+        '✅ Checking MeraPath eligibility...',
+        '📊 Calculating bid strength score...',
+        '📝 Preparing preview...'
+      ];
+      let i = 0;
+      const el = document.getElementById('loadingSteps');
+      el.textContent = steps[0];
+      const iv = setInterval(() => {
+        i++; if (i >= steps.length) { clearInterval(iv); return; }
+        el.innerHTML += '<br>' + steps[i];
+      }, 1500);
+    }
+
+    function showToast(msg) {
+      const wrap = document.getElementById('toastWrap');
+      const t = document.createElement('div');
+      t.className = 'toast'; t.textContent = msg;
+      wrap.appendChild(t);
+      setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; setTimeout(() => t.remove(), 300); }, 4000);
+    }
+
+    // ── GAP REASONS (sidebar subtext) ────────────────────────────────────────
+    async function loadGapReasons(data) {
+      const match = data.match_engine || {};
+      const hasGaps = Object.values(match).some(v => !v);
+      if (!hasGaps) return;
+
+      try {
+        const res = await fetch(`${API}/gaps`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        const result = await res.json();
+
+        if (result.error || !result.gaps) return;
+
+        result.gaps.forEach(function (gap) {
+          let key = (gap.criterion || '').toLowerCase();
+          if (!MATCH_LABELS[key]) {
+            key = Object.keys(MATCH_LABELS).find(function (k) {
+              const label = MATCH_LABELS[k].toLowerCase();
+              const gapLabel = (gap.gap_label || '').toLowerCase();
+              const gapCrit = (gap.criterion || '').toLowerCase();
+              return gapLabel.includes(label) || label.includes(gapLabel) ||
+                     gapCrit.includes(label) || label.includes(gapCrit);
+            });
+          }
+          if (!key) return;
+
+          const item = document.getElementById('match-' + key);
+          if (item && gap.why_gap_exists && !item.querySelector('.match-reason')) {
+            const reasonEl = document.createElement('div');
+            reasonEl.className = 'match-reason';
+            reasonEl.textContent = gap.why_gap_exists;
+            item.appendChild(reasonEl);
+          }
+        });
+      } catch (e) {
+        console.log('Gap reasons fetch failed silently:', e);
+      }
+    }
+
+    showScreen('upload');
+    function showErrorScreen(icon, title, message) {
+      // Replace upload screen content with error
+      document.getElementById('uploadScreen').style.display = 'block';
+      document.getElementById('loadingScreen').style.display = 'none';
+      document.getElementById('resultsScreen').style.display = 'none';
+
+      document.getElementById('uploadScreen').innerHTML = `
+    <div style="max-width:560px;margin:60px auto;padding:0 20px">
+      <div style="background:#fff;border:1px solid var(--border);border-radius:16px;padding:48px;text-align:center">
+        <div style="font-size:48px;margin-bottom:16px">${icon}</div>
+        <div style="font-size:20px;font-weight:700;color:var(--navy);margin-bottom:10px">${title}</div>
+        <div style="font-size:14px;color:var(--text3);line-height:1.7;margin-bottom:28px">${message}</div>
+        <button onclick="location.reload()"
+          style="background:var(--navy);color:#fff;border:none;padding:10px 28px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer">
+          Try Again
+        </button>
+      </div>
+    </div>`;
+    }
+
+    async function showGapFix(key, label) {
+      document.getElementById('gapModal').classList.add('open');
+      document.getElementById('gapModalTitle').textContent = label + ' — Gap Strategy';
+      document.getElementById('gapModalSub').textContent = 'How to address this in your proposal';
+      document.getElementById('gapModalContent').innerHTML = '<div class="gap-loading">🤖 Generating strategy...</div>';
+
+      try {
+        const res = await fetch(`${API}/gaps`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(currentData)
+        });
+        const result = await res.json();
+
+        if (result.error) {
+          const isRateLimit = result.error === 'rate_limit';
+          document.getElementById('gapModalContent').innerHTML = `
+        <div class="gap-loading">${isRateLimit ? '⏳' : '❌'} ${result.message || 'Something went wrong'}</div>`;
+          return;
+        }
+
+        // Find the specific gap for this key
+        const gap = result.gaps?.find(g => g.gap_label?.toLowerCase().includes(label.toLowerCase()))
+          || result.gaps?.[0];
+
+        if (!gap) {
+          document.getElementById('gapModalContent').innerHTML =
+            '<div class="gap-loading">No strategy found for this gap.</div>';
+          return;
+        }
+
+        const riskClass = `risk-${gap.risk_level || 'medium'}`;
+        const docs = (gap.documents_to_reference || []).map(d =>
+          `<span class="doc-chip">📎 ${d}</span>`).join('');
+
+        document.getElementById('gapModalContent').innerHTML = `
+      <div class="gap-section">
+        <div class="gap-section-label">Risk Level</div>
+        <span class="risk-badge ${riskClass}">${(gap.risk_level || 'medium').toUpperCase()}</span>
+      </div>
+      <div class="gap-section">
+        <div class="gap-section-label">Why This Gap Exists</div>
+        <div class="gap-section-body">${gap.why_gap_exists || '—'}</div>
+      </div>
+      <div class="gap-section">
+        <div class="gap-section-label">Framing Strategy</div>
+        <div class="gap-section-body">${gap.framing_strategy || '—'}</div>
+      </div>
+      <div class="gap-section">
+        <div class="gap-section-label">What to Write in the Proposal</div>
+        <div class="gap-section-body">${gap.what_to_write || '—'}</div>
+      </div>
+      <div class="gap-section">
+        <div class="gap-section-label">Documents to Reference</div>
+        <div>${docs || '<span style="font-size:12px;color:var(--text3)">No specific documents</span>'}</div>
+      </div>`;
+
+      } catch (e) {
+        document.getElementById('gapModalContent').innerHTML =
+          '<div class="gap-loading">❌ Could not connect to server.</div>';
+      }
+    }
+
+    function closeGapModal() {
+      document.getElementById('gapModal').classList.remove('open');
+    }
+  </script>
+  <!-- GAP FIX MODAL -->
+  <div class="modal-overlay" id="gapModal">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeGapModal()">✕</button>
+      <div class="modal-title" id="gapModalTitle">Eligibility Gap Strategy</div>
+      <div class="modal-sub" id="gapModalSub">AI-generated fix for this gap</div>
+      <div id="gapModalContent">
+        <div class="gap-loading">🤖 Generating strategy...</div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
