@@ -73,6 +73,17 @@ def _call_groq(prompt: str) -> str:
 def analyse_tender(pdf_bytes: bytes) -> dict:
     raw_text = extract_text_from_pdf(pdf_bytes)
 
+    # Groq free tier for 70b-versatile has a hard limit of 12,000 Tokens Per Minute.
+    # To safely stay under this, we must limit the text to ~35,000 characters.
+    MAX_CHARS = 35000
+    if len(raw_text) > MAX_CHARS:
+        # For huge documents (e.g. 300+ pages), keep the beginning and the end.
+        # The middle is usually generic boilerplate terms & conditions.
+        half = MAX_CHARS // 2
+        text_to_send = raw_text[:half] + "\n\n... [MIDDLE CONTENT OMITTED FOR LENGTH] ...\n\n" + raw_text[-half:]
+    else:
+        text_to_send = raw_text
+
     prompt = f"""You are a senior bid analyst for MeraPath Education Limited.
 
 MeraPath Profile:
@@ -86,8 +97,11 @@ MeraPath Profile:
 
 Analyse this tender document and return ONLY valid JSON. No markdown, no explanation.
 
+CRITICAL INSTRUCTION FOR MATCH ENGINE: 
+For the `match_engine` object, output `true` if MeraPath's profile meets the tender's requirement OR if the tender does NOT require that specific criteria. Output `false` ONLY if the tender explicitly requires that experience/certification and MeraPath does not meet it.
+
 TENDER TEXT:
-{raw_text[:8000]}
+{text_to_send}
 
 Return this exact JSON structure:
 {{
@@ -117,10 +131,10 @@ Return this exact JSON structure:
     "lakhpati": true or false,
     "ndlm": true or false,
     "pmay": true or false,
-    "iso": true,
-    "msme": true,
-    "geographic": true,
-    "scale": true
+    "iso": true or false,
+    "msme": true or false,
+    "geographic": true or false,
+    "scale": true or false
   }},
   "bid_strength_score": "number between 0 and 100",
   "win_probability": "number between 0 and 100",
